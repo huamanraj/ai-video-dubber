@@ -18,7 +18,7 @@ async def cancel_job(job_id: str):
         raise HTTPException(status_code=404, detail="Job not found")
     if job["status"] == "processing":
         raise HTTPException(status_code=400, detail="Cannot cancel a job in progress")
-    if job["status"] in ("done", "failed"):
+    if job["status"] in ("completed", "failed"):
         remove_job(job_id)
         return {"detail": "Job removed"}
     # status == "queued"

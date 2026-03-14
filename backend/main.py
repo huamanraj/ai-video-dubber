@@ -10,6 +10,7 @@ load_dotenv()
 
 from routers import upload, status, queue, download, stream
 from queue_manager import worker
+from job_store import init_db
 
 app = FastAPI(title="Video Dubbing API", version="1.0.0")
 
@@ -42,7 +43,7 @@ async def health():
 
 @app.on_event("startup")
 async def startup_event():
-    # Start the background worker
+    init_db()
     asyncio.create_task(worker())
 
 
