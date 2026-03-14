@@ -10,13 +10,13 @@ export const api = {
   },
 
   async getQueue(): Promise<QueueItem[]> {
-    const res = await fetch(`${API_BASE}/queue`);
+    const res = await fetch(`${API_BASE}/api/queue`);
     if (!res.ok) throw new Error("Failed to fetch queue");
     return res.json();
   },
 
   async getStatus(jobId: string): Promise<JobStatus> {
-    const res = await fetch(`${API_BASE}/status/${jobId}`);
+    const res = await fetch(`${API_BASE}/api/status/${jobId}`);
     if (!res.ok) throw new Error("Failed to fetch status");
     return res.json();
   },
@@ -28,7 +28,7 @@ export const api = {
     if (voiceId) {
       formData.append("voice_id", voiceId);
     }
-    const res = await fetch(`${API_BASE}/dub`, {
+    const res = await fetch(`${API_BASE}/api/dub`, {
       method: "POST",
       body: formData,
     });
@@ -40,16 +40,16 @@ export const api = {
   },
 
   async cancelJob(jobId: string): Promise<void> {
-    const res = await fetch(`${API_BASE}/queue/${jobId}`, { method: "DELETE" });
+    const res = await fetch(`${API_BASE}/api/queue/${jobId}`, { method: "DELETE" });
     if (!res.ok) throw new Error("Failed to cancel job");
   },
 
   getDownloadUrl(jobId: string): string {
-    return `${API_BASE}/download/${jobId}`;
+    return `${API_BASE}/api/download/${jobId}`;
   },
 
   getStreamUrl(jobId: string): string {
-    return `${API_BASE}/stream/${jobId}`;
+    return `${API_BASE}/api/stream/${jobId}`;
   },
 };
 
@@ -60,6 +60,7 @@ export interface QueueItem {
   status: "queued" | "processing" | "completed" | "failed" | "cancelled";
   progress: number;
   current_step?: string;
+  stage?: number;
   created_at?: string;
 }
 

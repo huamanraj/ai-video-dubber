@@ -40,6 +40,9 @@ def serialize_job(job: dict) -> dict:
     can_download = reconciled.get("status") == "done" and _is_valid_output_file(job_id)
 
     payload = dict(reconciled)
+    payload["file_name"] = payload.pop("filename", "unknown")
+    payload["target_language"] = payload.pop("target_lang", "unknown")
+    payload["current_step"] = payload.get("stage_name", "Waiting in queue")
     payload["can_download"] = can_download
     payload["download_url"] = f"/download/{job_id}" if can_download else None
     return payload

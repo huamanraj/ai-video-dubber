@@ -75,44 +75,82 @@ LANGUAGE_MAP = {
     "sd": "Sindhi",
 }
 
-# Sarvam AI Voice IDs for each language
+# Sarvam AI Voice IDs for each language (using new API speaker names)
 SARVAM_VOICES = {
     # Indian regional voices
-    "hi": ["hi_female_1", "hi_male_1", "hi_female_2"],
-    "bn": ["bn_female_1", "bn_male_1"],
-    "ta": ["ta_female_1", "ta_male_1"],
-    "te": ["te_female_1", "te_male_1"],
-    "kn": ["kn_female_1", "kn_male_1"],
-    "ml": ["ml_female_1", "ml_male_1"],
-    "mr": ["mr_female_1", "mr_male_1"],
-    "gu": ["gu_female_1", "gu_male_1"],
-    "pa": ["pa_female_1", "pa_male_1"],
-    "or": ["or_female_1", "or_male_1"],
-    "ur": ["ur_female_1", "ur_male_1"],
-    "as": ["as_female_1", "as_male_1"],
-    "mai": ["hi_female_1"],  # Fallback to Hindi
-    "sa": ["hi_female_1"],  # Fallback to Hindi
-    "raj": ["hi_female_1"],  # Fallback to Hindi
-    "bho": ["hi_female_1"],  # Fallback to Hindi
-    "doi": ["hi_female_1"],  # Fallback to Hindi
-    "kok": ["mr_female_1"],  # Fallback to Marathi
-    "mni": ["bn_female_1"],  # Fallback to Bengali
-    "sat": ["bn_female_1"],  # Fallback to Bengali
-    "sd": ["ur_female_1"],  # Fallback to Urdu
+    "hi": ["priya", "shubh"],  # Female, Male
+    "bn": ["priya", "shubh"],
+    "ta": ["priya", "shubh"],
+    "te": ["priya", "shubh"],
+    "kn": ["priya", "shubh"],
+    "ml": ["priya", "shubh"],
+    "mr": ["priya", "shubh"],
+    "gu": ["priya", "shubh"],
+    "pa": ["priya", "shubh"],
+    "or": ["priya", "shubh"],
+    "ur": ["priya", "shubh"],
+    "as": ["priya", "shubh"],
+    "mai": ["priya"],  # Fallback to Hindi
+    "sa": ["priya"],  # Fallback to Hindi
+    "raj": ["priya"],  # Fallback to Hindi
+    "bho": ["priya"],  # Fallback to Hindi
+    "doi": ["priya"],  # Fallback to Hindi
+    "kok": ["priya"],  # Fallback to Marathi
+    "mni": ["priya"],  # Fallback to Bengali
+    "sat": ["priya"],  # Fallback to Bengali
+    "sd": ["priya"],  # Fallback to Urdu
     # International voices (fallback to English)
-    "es": ["en_female_1"],
-    "fr": ["en_female_1"],
-    "de": ["en_female_1"],
-    "pt": ["en_female_1"],
-    "ar": ["en_female_1"],
-    "ja": ["en_female_1"],
-    "ko": ["en_female_1"],
-    "zh": ["en_female_1"],
-    "tr": ["en_female_1"],
-    "it": ["en_female_1"],
-    "ru": ["en_female_1"],
-    "id": ["en_female_1"],
-    "vi": ["en_female_1"],
+    "es": ["shubh"],
+    "fr": ["shubh"],
+    "de": ["shubh"],
+    "pt": ["shubh"],
+    "ar": ["shubh"],
+    "ja": ["shubh"],
+    "ko": ["shubh"],
+    "zh": ["shubh"],
+    "tr": ["shubh"],
+    "it": ["shubh"],
+    "ru": ["shubh"],
+    "id": ["shubh"],
+    "vi": ["shubh"],
+}
+
+# Sarvam API language codes (needs -IN suffix)
+SARVAM_LANGUAGE_MAP = {
+    "hi": "hi-IN",
+    "bn": "bn-IN",
+    "ta": "ta-IN",
+    "te": "te-IN",
+    "kn": "kn-IN",
+    "ml": "ml-IN",
+    "mr": "mr-IN",
+    "gu": "gu-IN",
+    "pa": "pa-IN",
+    "or": "or-IN",
+    "ur": "ur-IN",
+    "as": "as-IN",
+    "mai": "hi-IN",
+    "sa": "hi-IN",
+    "raj": "hi-IN",
+    "bho": "hi-IN",
+    "doi": "hi-IN",
+    "kok": "mr-IN",
+    "mni": "bn-IN",
+    "sat": "bn-IN",
+    "sd": "ur-IN",
+    "es": "en-IN",
+    "fr": "en-IN",
+    "de": "en-IN",
+    "pt": "en-IN",
+    "ar": "en-IN",
+    "ja": "en-IN",
+    "ko": "en-IN",
+    "zh": "en-IN",
+    "tr": "en-IN",
+    "it": "en-IN",
+    "ru": "en-IN",
+    "id": "en-IN",
+    "vi": "en-IN",
 }
 
 
