@@ -36,9 +36,7 @@ async def dub(
     with open(video_path, "wb") as f:
         f.write(await video.read())
 
-    # Store voice_id in job metadata
-    job = create_job(job_id, video.filename or "input.mp4", target_language)
-    job["voice_id"] = voice_id
+    job = create_job(job_id, video.filename or "input.mp4", target_language, voice_id=voice_id)
     
     await job_queue.put(job_id)
     notify_update()

@@ -1,3 +1,4 @@
+import asyncio
 import os
 import subprocess
 import traceback
@@ -17,6 +18,10 @@ from pipeline.stage6_timeline import build_audio_timeline
 from pipeline.stage7_mux import mux_video
 
 
+def _run_in_thread(func, *args):
+    return asyncio.get_event_loop().run_in_executor(None, func, *args)
+
+
 def _get_duration_ms(file_path: str) -> int:
     result = subprocess.run(
         [
@@ -33,12 +38,14 @@ def _get_duration_ms(file_path: str) -> int:
 
 
 def _begin_stage(job_id: str, stage: int):
-    update_job(job_id, stage=stage, stage_name=STAGE_NAMES[stage], progress=0)
+    progress = int((stage - 1) * 100 / 7)
+    update_job(job_id, stage=stage, stage_name=STAGE_NAMES[stage], progress=progress)
     notify_update()
 
 
 def _end_stage(job_id: str, stage: int):
-    update_job(job_id, progress=100)
+    progress = int(stage * 100 / 7)
+    update_job(job_id, progress=progress)
     notify_update()
 
 
@@ -62,41 +69,44 @@ async def run_pipeline(job_id: str):
     try:
         # Stage 1
         _begin_stage(job_id, 1)
-        audio_path = extract_audio(video_path, os.path.join(job_dir, "audio.wav"))
+        audio_path = await _run_in_thread(extract_audio, video_path, os.path.join(job_dir, "audio.wav"))
         total_duration_ms = _get_duration_ms(audio_path)
         _end_stage(job_id, 1)
 
         # Stage 2
         _begin_stage(job_id, 2)
-        segments = transcribe(audio_path)
+        segments = await _run_in_thread(transcribe, audio_path)
         _end_stage(job_id, 2)
 
         # Stage 3
         _begin_stage(job_id, 3)
-        segments = translate_segments(segments, nllb_code)
+        segments = await _run_in_thread(translate_segments, segments, nllb_code)
         _end_stage(job_id, 3)
 
         # Stage 4 — route to Indic or standard TTS with voice selection
         _begin_stage(job_id, 4)
         voice_id = job.get("voice_id")
         if target_lang in INDIAN_LANGUAGES:
-            clip_paths = generate_tts_clips_indic(
+            clip_paths = await _run_in_thread(
+                generate_tts_clips_indic,
                 segments, audio_path, job_dir, target_lang, voice_id
             )
         else:
-            clip_paths = generate_tts_clips(
-                segments, audio_path, job_dir, lang=target_lang, voice_id=voice_id or "en_female_1"
+            clip_paths = await _run_in_thread(
+                generate_tts_clips,
+                segments, audio_path, job_dir, target_lang, voice_id or "en_female_1"
             )
         _end_stage(job_id, 4)
 
         # Stage 5
         _begin_stage(job_id, 5)
-        stretched_paths = time_stretch_clips(segments, clip_paths, job_dir)
+        stretched_paths = await _run_in_thread(time_stretch_clips, segments, clip_paths, job_dir)
         _end_stage(job_id, 5)
 
         # Stage 6
         _begin_stage(job_id, 6)
-        dubbed_audio = build_audio_timeline(
+        dubbed_audio = await _run_in_thread(
+            build_audio_timeline,
             segments, stretched_paths, total_duration_ms, job_dir
         )
         _end_stage(job_id, 6)
@@ -104,7 +114,7 @@ async def run_pipeline(job_id: str):
         # Stage 7
         _begin_stage(job_id, 7)
         output_path = os.path.join(job_dir, "output.mp4")
-        mux_video(video_path, dubbed_audio, output_path)
+        await _run_in_thread(mux_video, video_path, dubbed_audio, output_path)
         if not os.path.exists(output_path) or os.path.getsize(output_path) == 0:
             raise RuntimeError(
                 "Processing error: ffmpeg completed but output.mp4 is missing or empty."
@@ -113,7 +123,7 @@ async def run_pipeline(job_id: str):
 
         update_job(
             job_id,
-            status="done",
+            status="completed",
             stage_name="Complete",
             finished_at=datetime.now(timezone.utc).isoformat(),
         )

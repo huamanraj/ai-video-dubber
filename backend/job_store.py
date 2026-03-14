@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 jobs: dict[str, dict] = {}
 
 
-def create_job(job_id: str, filename: str, target_lang: str, voice_id: str = None) -> dict:
+def create_job(job_id: str, filename: str, target_lang: str, voice_id: str = None, **extra) -> dict:
     job = {
         "job_id": job_id,
         "filename": filename,
@@ -18,6 +18,7 @@ def create_job(job_id: str, filename: str, target_lang: str, voice_id: str = Non
         "started_at": None,
         "finished_at": None,
         "queue_position": 0,
+        **extra,
     }
     jobs[job_id] = job
     _recalc_positions()
@@ -62,5 +63,5 @@ def _recalc_positions():
         j["queue_position"] = i + 1 + len(processing)
 
     for j in jobs.values():
-        if j["status"] in ("done", "failed"):
+        if j["status"] in ("completed", "failed"):
             j["queue_position"] = 0

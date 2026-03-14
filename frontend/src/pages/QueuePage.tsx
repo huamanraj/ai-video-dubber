@@ -143,7 +143,7 @@ export default function QueuePage() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <div className="text-xs text-muted-foreground">
-                              Stage {job.stage || 0}/8
+                              Stage {job.stage || 0}/7
                             </div>
                             <div className="flex-1">
                               <div className="h-1.5 bg-muted rounded-full overflow-hidden">

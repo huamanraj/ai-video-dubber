@@ -16,7 +16,7 @@ def _is_valid_output_file(job_id: str) -> bool:
 
 def reconcile_output_state(job: dict) -> dict:
     """Downgrade stale done jobs when output file is missing/empty."""
-    if job.get("status") != "done":
+    if job.get("status") != "completed":
         return job
 
     job_id = job["job_id"]
@@ -37,7 +37,7 @@ def reconcile_output_state(job: dict) -> dict:
 def serialize_job(job: dict) -> dict:
     reconciled = reconcile_output_state(job)
     job_id = reconciled["job_id"]
-    can_download = reconciled.get("status") == "done" and _is_valid_output_file(job_id)
+    can_download = reconciled.get("status") == "completed" and _is_valid_output_file(job_id)
 
     payload = dict(reconciled)
     payload["file_name"] = payload.pop("filename", "unknown")

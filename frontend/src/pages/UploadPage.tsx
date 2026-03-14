@@ -140,7 +140,7 @@ export default function UploadPage() {
           setLanguage("");
           setVoiceId("");
           setAvailableVoices([]);
-          navigate("/");
+          setTimeout(() => navigate("/"), 100);
         },
       }
     );
