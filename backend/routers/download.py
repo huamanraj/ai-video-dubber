@@ -37,3 +37,18 @@ async def download(job_id: str):
         media_type="video/mp4",
         filename=dubbed_name,
     )
+
+
+@router.get("/original/{job_id}")
+async def original(job_id: str):
+    job = get_job(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail="Job not found")
+
+    from config import UPLOAD_DIR
+    input_path = UPLOAD_DIR / job_id / "input.mp4"
+    if not input_path.exists():
+        raise HTTPException(status_code=404, detail="Original file not found")
+
+    original_name = Path(job.get("filename", "input.mp4"))
+    return FileResponse(str(input_path), media_type="video/mp4", filename=original_name.name)

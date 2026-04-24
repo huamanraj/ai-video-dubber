@@ -23,6 +23,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { api } from "@/lib/api";
+import { Link } from "react-router-dom";
 import { Download, X, ChevronDown, ChevronRight, Loader2, InboxIcon, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -154,8 +155,13 @@ export default function QueuePage() {
                     <TableCell className="font-mono text-xs">
                       {job.job_id.slice(0, 8)}…
                     </TableCell>
-                    <TableCell className="text-sm max-w-[200px] truncate">
-                      {job.file_name}
+                    <TableCell className="text-sm max-w-[200px] truncate" onClick={(e) => e.stopPropagation()}>
+                      <Link
+                        to={`/dashboard/job/${job.job_id}`}
+                        className="hover:text-primary hover:underline underline-offset-2 transition-colors"
+                      >
+                        {job.file_name}
+                      </Link>
                     </TableCell>
                     <TableCell className="text-sm capitalize">
                       {job.target_language}

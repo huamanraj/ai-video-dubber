@@ -57,6 +57,10 @@ export const api = {
   getStreamUrl(jobId: string): string {
     return `${API_BASE}/api/stream/${jobId}`;
   },
+
+  getOriginalVideoUrl(jobId: string): string {
+    return `${API_BASE}/api/original/${jobId}`;
+  },
 };
 
 export interface QueueItem {
@@ -75,9 +79,11 @@ export interface JobStatus {
   status: "queued" | "processing" | "completed" | "failed" | "cancelled";
   progress: number;
   current_step?: string;
+  stage?: number;
   file_name?: string;
   target_language?: string;
   created_at?: string;
-  completed_at?: string;
+  finished_at?: string;
   error?: string;
+  can_download?: boolean;
 }
