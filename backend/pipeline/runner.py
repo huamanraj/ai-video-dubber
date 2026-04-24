@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from config import UPLOAD_DIR, LANGUAGE_MAP, STAGE_NAMES, INDIAN_LANGUAGES
 from job_store import update_job, get_job
 from queue_manager import notify_update
+from model_loader import models_ready
 
 from pipeline.stage1_extract import extract_audio
 from pipeline.stage2_transcribe import transcribe
@@ -19,7 +20,7 @@ from pipeline.stage7_mux import mux_video
 
 
 def _run_in_thread(func, *args):
-    return asyncio.get_event_loop().run_in_executor(None, func, *args)
+    return asyncio.to_thread(func, *args)
 
 
 def _get_duration_ms(file_path: str) -> int:
@@ -53,6 +54,14 @@ async def run_pipeline(job_id: str):
     job = get_job(job_id)
     if job is None:
         return
+
+    # Wait for background model preload to finish before touching GPU.
+    # If preload is still in flight, the job sits as "processing" briefly;
+    # if preload already finished, this returns immediately.
+    if not models_ready.is_set():
+        update_job(job_id, stage_name="Waiting for models to load")
+        notify_update()
+        await models_ready.wait()
 
     job_dir = str(UPLOAD_DIR / job_id)
     video_path = os.path.join(job_dir, "input.mp4")

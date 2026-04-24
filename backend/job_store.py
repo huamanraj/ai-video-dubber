@@ -116,6 +116,12 @@ def list_jobs() -> list[dict]:
     return [_row_to_job(row) for row in rows]
 
 
+def clear_all_jobs() -> int:
+    with get_cursor() as cursor:
+        cursor.execute("DELETE FROM jobs")
+        return cursor.rowcount
+
+
 def remove_job(job_id: str) -> bool:
     with get_cursor() as cursor:
         cursor.execute("DELETE FROM jobs WHERE job_id = ?", (job_id,))

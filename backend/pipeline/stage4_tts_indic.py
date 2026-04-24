@@ -7,18 +7,7 @@ import json
 
 import numpy as np
 import soundfile as sf
-from config import SARVAM_API_KEY, SARVAM_API_BASE_URL, SARVAM_LANGUAGE_MAP, INDIC_NLP_LANG_MAP
-
-
-def _normalize_indic_text(text: str, lang: str) -> str:
-    """Normalize Indian script text — fixes Unicode, punctuation, number forms."""
-    try:
-        from indicnlp.normalize.indic_normalize import IndicNormalizerFactory
-        nlp_lang = INDIC_NLP_LANG_MAP.get(lang, lang)
-        normalizer = IndicNormalizerFactory().get_normalizer(nlp_lang)
-        return normalizer.normalize(text)
-    except Exception:
-        return text
+from config import SARVAM_API_KEY, SARVAM_API_BASE_URL, SARVAM_LANGUAGE_MAP
 
 
 def _generate_with_sarvam(
@@ -34,7 +23,10 @@ def _generate_with_sarvam(
         raise ValueError("SARVAM_API_KEY is not set in environment variables")
     
     # Convert language code to Sarvam format (e.g., "hi" -> "hi-IN")
-    sarvam_lang = SARVAM_LANGUAGE_MAP.get(language, "en-IN")
+    sarvam_lang = SARVAM_LANGUAGE_MAP.get(language)
+    
+    if sarvam_lang is None:
+        raise ValueError(f"Language '{language}' is not supported by Sarvam TTS API. Supported languages: hi, bn, ta, te, kn, ml, mr, gu, pa, or")
     
     headers = {
         "api-subscription-key": SARVAM_API_KEY,
@@ -88,10 +80,11 @@ def generate_tts_clips_indic(
     from config import SARVAM_VOICES
     
     # Get default voice for language if not specified
+    from config import DEFAULT_VOICE
     if not voice_id and lang in SARVAM_VOICES:
         voice_id = SARVAM_VOICES[lang][0]
     elif not voice_id:
-        voice_id = "priya"  # Fallback
+        voice_id = DEFAULT_VOICE  # Use "shubh" as fallback
     
     clips_dir = os.path.join(output_dir, "clips")
     os.makedirs(clips_dir, exist_ok=True)
@@ -106,10 +99,7 @@ def generate_tts_clips_indic(
             clip_paths.append(out_path)
             continue
         
-        # Normalize text for Indian languages
-        cleaned = _normalize_indic_text(text, lang)
-        
-        success = _generate_with_sarvam(cleaned, voice_id, lang, out_path)
+        success = _generate_with_sarvam(text, voice_id, lang, out_path)
         
         if not success:
             sf.write(out_path, np.zeros(8000, dtype=np.float32), 16000)

@@ -9,19 +9,16 @@ UPLOAD_DIR = Path("uploads")
 SARVAM_API_KEY = os.getenv("SARVAM_API_KEY", "")
 SARVAM_API_BASE_URL = os.getenv("SARVAM_API_BASE_URL", "https://api.sarvam.ai")
 SARVAM_BULBUL_V3_MODEL = os.getenv("SARVAM_BULBUL_V3_MODEL", "bulbul-v3")
+SARVAM_STT_MODEL = os.getenv("SARVAM_STT_MODEL", "saaras:v3")
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
 
-# ── Whisper (Stage 2) ─────────────────────────────────────────────────────────
-# GTX 1650 (4GB VRAM) safe choices:
-#   "small"  ~2GB  → fast, good accuracy          ✅ recommended
-#   "medium" ~3GB  → best quality that safely fits ✅ current
-#   "large"  ~5GB  → ❌ OOM on 4GB VRAM
-WHISPER_MODEL = "medium"
-WHISPER_COMPUTE = "int8"        # int8 saves VRAM vs float16, same accuracy
-WHISPER_SOURCE_LANGUAGE = os.getenv("WHISPER_SOURCE_LANGUAGE", "").strip() or None
+# ── STT (Stage 2 — Sarvam saarika:v2) ────────────────────────────────────────
+# BCP-47 code of the source audio language, e.g. "hi-IN", "en-IN", "ta-IN".
+# Leave blank (or "unknown") for auto-detection.
+SARVAM_SOURCE_LANGUAGE = os.getenv("SARVAM_SOURCE_LANGUAGE", "unknown").strip() or "unknown"
 
 
 # ── Translation (Stage 3) ─────────────────────────────────────────────────────
@@ -75,47 +72,60 @@ LANGUAGE_MAP = {
     "sd": "Sindhi",
 }
 
-# Sarvam AI Voice IDs for each language (using new API speaker names)
+# All available Sarvam AI voice models
+ALL_SARVAM_VOICES = [
+    "shubh", "aditya", "ritu", "priya", "neha", "rahul", "pooja", "rohan",
+    "simran", "kavya", "amit", "dev", "ishita", "shreya", "ratan", "varun",
+    "manan", "sumit", "roopa", "kabir", "aayan", "ashutosh", "advait", "anand",
+    "tanya", "tarun", "sunny", "mani", "gokul", "vijay", "shruti", "suhani",
+    "mohit", "kavitha", "rehan", "soham", "rupali"
+]
+
+# Sarvam AI Voice IDs for each language (all voices available for all languages)
 SARVAM_VOICES = {
-    # Indian regional voices
-    "hi": ["priya", "shubh"],  # Female, Male
-    "bn": ["priya", "shubh"],
-    "ta": ["priya", "shubh"],
-    "te": ["priya", "shubh"],
-    "kn": ["priya", "shubh"],
-    "ml": ["priya", "shubh"],
-    "mr": ["priya", "shubh"],
-    "gu": ["priya", "shubh"],
-    "pa": ["priya", "shubh"],
-    "or": ["priya", "shubh"],
-    "ur": ["priya", "shubh"],
-    "as": ["priya", "shubh"],
-    "mai": ["priya"],  # Fallback to Hindi
-    "sa": ["priya"],  # Fallback to Hindi
-    "raj": ["priya"],  # Fallback to Hindi
-    "bho": ["priya"],  # Fallback to Hindi
-    "doi": ["priya"],  # Fallback to Hindi
-    "kok": ["priya"],  # Fallback to Marathi
-    "mni": ["priya"],  # Fallback to Bengali
-    "sat": ["priya"],  # Fallback to Bengali
-    "sd": ["priya"],  # Fallback to Urdu
-    # International voices (fallback to English)
-    "es": ["shubh"],
-    "fr": ["shubh"],
-    "de": ["shubh"],
-    "pt": ["shubh"],
-    "ar": ["shubh"],
-    "ja": ["shubh"],
-    "ko": ["shubh"],
-    "zh": ["shubh"],
-    "tr": ["shubh"],
-    "it": ["shubh"],
-    "ru": ["shubh"],
-    "id": ["shubh"],
-    "vi": ["shubh"],
+    # Indian regional voices - all voices available
+    "hi": ALL_SARVAM_VOICES,
+    "bn": ALL_SARVAM_VOICES,
+    "ta": ALL_SARVAM_VOICES,
+    "te": ALL_SARVAM_VOICES,
+    "kn": ALL_SARVAM_VOICES,
+    "ml": ALL_SARVAM_VOICES,
+    "mr": ALL_SARVAM_VOICES,
+    "gu": ALL_SARVAM_VOICES,
+    "pa": ALL_SARVAM_VOICES,
+    "or": ALL_SARVAM_VOICES,
+    "ur": ALL_SARVAM_VOICES,
+    "as": ALL_SARVAM_VOICES,
+    "mai": ALL_SARVAM_VOICES,
+    "sa": ALL_SARVAM_VOICES,
+    "raj": ALL_SARVAM_VOICES,
+    "bho": ALL_SARVAM_VOICES,
+    "doi": ALL_SARVAM_VOICES,
+    "kok": ALL_SARVAM_VOICES,
+    "mni": ALL_SARVAM_VOICES,
+    "sat": ALL_SARVAM_VOICES,
+    "sd": ALL_SARVAM_VOICES,
+    # International voices
+    "es": ALL_SARVAM_VOICES,
+    "fr": ALL_SARVAM_VOICES,
+    "de": ALL_SARVAM_VOICES,
+    "pt": ALL_SARVAM_VOICES,
+    "ar": ALL_SARVAM_VOICES,
+    "ja": ALL_SARVAM_VOICES,
+    "ko": ALL_SARVAM_VOICES,
+    "zh": ALL_SARVAM_VOICES,
+    "tr": ALL_SARVAM_VOICES,
+    "it": ALL_SARVAM_VOICES,
+    "ru": ALL_SARVAM_VOICES,
+    "id": ALL_SARVAM_VOICES,
+    "vi": ALL_SARVAM_VOICES,
 }
 
+# Default voice for each language (shubh is default)
+DEFAULT_VOICE = "shubh"
+
 # Sarvam API language codes (needs -IN suffix)
+# Only supports: bn-IN, en-IN, gu-IN, hi-IN, kn-IN, ml-IN, mr-IN, od-IN, pa-IN, ta-IN, te-IN
 SARVAM_LANGUAGE_MAP = {
     "hi": "hi-IN",
     "bn": "bn-IN",
@@ -126,31 +136,33 @@ SARVAM_LANGUAGE_MAP = {
     "mr": "mr-IN",
     "gu": "gu-IN",
     "pa": "pa-IN",
-    "or": "or-IN",
-    "ur": "ur-IN",
-    "as": "as-IN",
-    "mai": "hi-IN",
-    "sa": "hi-IN",
-    "raj": "hi-IN",
-    "bho": "hi-IN",
-    "doi": "hi-IN",
-    "kok": "mr-IN",
-    "mni": "bn-IN",
-    "sat": "bn-IN",
-    "sd": "ur-IN",
-    "es": "en-IN",
-    "fr": "en-IN",
-    "de": "en-IN",
-    "pt": "en-IN",
-    "ar": "en-IN",
-    "ja": "en-IN",
-    "ko": "en-IN",
-    "zh": "en-IN",
-    "tr": "en-IN",
-    "it": "en-IN",
-    "ru": "en-IN",
-    "id": "en-IN",
-    "vi": "en-IN",
+    "or": "od-IN",  # Odia uses od-IN code
+    # Non-supported languages - will fail at TTS stage
+    # These are set to None to indicate TTS is not supported
+    "ur": None,
+    "as": None,
+    "mai": None,
+    "sa": None,
+    "raj": None,
+    "bho": None,
+    "doi": None,
+    "kok": None,
+    "mni": None,
+    "sat": None,
+    "sd": None,
+    "es": None,
+    "fr": None,
+    "de": None,
+    "pt": None,
+    "ar": None,
+    "ja": None,
+    "ko": None,
+    "zh": None,
+    "tr": None,
+    "it": None,
+    "ru": None,
+    "id": None,
+    "vi": None,
 }
 
 
@@ -177,33 +189,6 @@ INDIAN_LANGUAGES = {
     "mni",  # Manipuri
     "sat",  # Santali
     "sd",   # Sindhi
-}
-
-
-# Mapping from lang code → indic_nlp_library normalizer code
-# Used for Unicode/punctuation normalization
-INDIC_NLP_LANG_MAP = {
-    "hi": "hi",
-    "bn": "bn",
-    "ta": "ta",
-    "te": "te",
-    "kn": "kn",
-    "ml": "ml",
-    "mr": "mr",
-    "gu": "gu",
-    "pa": "pa",
-    "or": "or",
-    "ur": "ur",
-    "as": "as",
-    "mai": "hi",   # Maithili → Hindi normalizer
-    "sa": "hi",    # Sanskrit → Hindi normalizer
-    "raj": "hi",   # Rajasthani → Hindi normalizer
-    "bho": "hi",   # Bhojpuri → Hindi normalizer
-    "doi": "hi",   # Dogri → Hindi normalizer
-    "kok": "mr",   # Konkani → Marathi normalizer
-    "mni": "bn",   # Manipuri → Bengali normalizer
-    "sat": "bn",   # Santali → Bengali normalizer
-    "sd": "ur",    # Sindhi → Urdu normalizer
 }
 
 

@@ -56,3 +56,17 @@ export function useCancelJob() {
     },
   });
 }
+
+export function useClearQueue() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: () => api.clearQueue(),
+    onSuccess: () => {
+      toast({ title: "Queue cleared" });
+      qc.invalidateQueries({ queryKey: ["queue"] });
+    },
+    onError: (err: Error) => {
+      toast({ title: "Clear failed", description: err.message, variant: "destructive" });
+    },
+  });
+}

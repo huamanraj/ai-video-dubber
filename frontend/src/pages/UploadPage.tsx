@@ -12,21 +12,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Upload, FileVideo, X, Loader2, Volume2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+// Only Indian languages supported by Sarvam TTS API
 const LANGUAGES = [
-  { value: "es", label: "Spanish" },
-  { value: "fr", label: "French" },
-  { value: "de", label: "German" },
-  { value: "pt", label: "Portuguese" },
-  { value: "ja", label: "Japanese" },
-  { value: "ko", label: "Korean" },
-  { value: "zh", label: "Chinese" },
-  { value: "ar", label: "Arabic" },
-  { value: "it", label: "Italian" },
-  { value: "tr", label: "Turkish" },
-  { value: "ru", label: "Russian" },
-  { value: "id", label: "Indonesian" },
-  { value: "vi", label: "Vietnamese" },
-  // Indian regional languages (19)
+  // Indian regional languages (10 supported by Sarvam TTS)
   { value: "hi", label: "Hindi" },
   { value: "bn", label: "Bengali" },
   { value: "ta", label: "Tamil" },
@@ -37,17 +25,6 @@ const LANGUAGES = [
   { value: "gu", label: "Gujarati" },
   { value: "pa", label: "Punjabi" },
   { value: "or", label: "Odia" },
-  { value: "ur", label: "Urdu" },
-  { value: "as", label: "Assamese" },
-  { value: "mai", label: "Maithili" },
-  { value: "sa", label: "Sanskrit" },
-  { value: "raj", label: "Rajasthani" },
-  { value: "bho", label: "Bhojpuri" },
-  { value: "doi", label: "Dogri" },
-  { value: "kok", label: "Konkani" },
-  { value: "mni", label: "Manipuri" },
-  { value: "sat", label: "Santali" },
-  { value: "sd", label: "Sindhi" },
 ];
 
 export default function UploadPage() {
@@ -72,58 +49,23 @@ export default function UploadPage() {
   // Update available voices when language changes
   useEffect(() => {
     if (language) {
-      // Map of voice IDs to display labels (using new Sarvam API speaker names)
-      const voiceMap: Record<string, string> = {
-        "priya": "Female (Priya)",
-        "shubh": "Male (Shubh)",
-      };
+      // All available Sarvam AI voices
+      const allVoices = [
+        "shubh", "aditya", "ritu", "priya", "neha", "rahul", "pooja", "rohan",
+        "simran", "kavya", "amit", "dev", "ishita", "shreya", "ratan", "varun",
+        "manan", "sumit", "roopa", "kabir", "aayan", "ashutosh", "advait", "anand",
+        "tanya", "tarun", "sunny", "mani", "gokul", "vijay", "shruti", "suhani",
+        "mohit", "kavitha", "rehan", "soham", "rupali"
+      ];
       
-      // Default voices for each language
-      const languageVoices: Record<string, string[]> = {
-        "hi": ["priya", "shubh"],
-        "bn": ["priya", "shubh"],
-        "ta": ["priya", "shubh"],
-        "te": ["priya", "shubh"],
-        "kn": ["priya", "shubh"],
-        "ml": ["priya", "shubh"],
-        "mr": ["priya", "shubh"],
-        "gu": ["priya", "shubh"],
-        "pa": ["priya", "shubh"],
-        "or": ["priya", "shubh"],
-        "ur": ["priya", "shubh"],
-        "as": ["priya", "shubh"],
-        "mai": ["priya"],
-        "sa": ["priya"],
-        "raj": ["priya"],
-        "bho": ["priya"],
-        "doi": ["priya"],
-        "kok": ["priya"],
-        "mni": ["priya"],
-        "sat": ["priya"],
-        "sd": ["priya"],
-        "es": ["shubh"],
-        "fr": ["shubh"],
-        "de": ["shubh"],
-        "pt": ["shubh"],
-        "ar": ["shubh"],
-        "ja": ["shubh"],
-        "ko": ["shubh"],
-        "zh": ["shubh"],
-        "tr": ["shubh"],
-        "it": ["shubh"],
-        "ru": ["shubh"],
-        "id": ["shubh"],
-        "vi": ["shubh"],
-      };
-      
-      const voices = languageVoices[language] || ["en_female_1"];
-      const voiceOptions = voices.map(id => ({
+      // Capitalize first letter for display
+      const voiceOptions = allVoices.map(id => ({
         id,
-        label: voiceMap[id] || id.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())
+        label: id.charAt(0).toUpperCase() + id.slice(1)
       }));
       
       setAvailableVoices(voiceOptions);
-      setVoiceId(voices[0]); // Set default voice
+      setVoiceId("shubh"); // Set default voice to shubh
     } else {
       setAvailableVoices([]);
       setVoiceId("");
@@ -140,7 +82,7 @@ export default function UploadPage() {
           setLanguage("");
           setVoiceId("");
           setAvailableVoices([]);
-          setTimeout(() => navigate("/"), 100);
+          setTimeout(() => navigate("/dashboard"), 100);
         },
       }
     );
@@ -182,10 +124,15 @@ export default function UploadPage() {
               }}
             />
             {file ? (
-              <div className="flex items-center justify-center gap-3">
-                <FileVideo className="h-8 w-8 text-primary" />
-                <div className="text-left">
-                  <p className="text-sm font-medium text-foreground">{file.name}</p>
+              <div className="flex items-center justify-center gap-3 max-w-full px-4">
+                <FileVideo className="h-8 w-8 text-primary flex-shrink-0" />
+                <div className="text-left flex-1 min-w-0">
+                  <p 
+                    className="text-sm font-medium text-foreground truncate max-w-[300px]" 
+                    title={file.name}
+                  >
+                    {file.name}
+                  </p>
                   <p className="text-xs text-muted-foreground">
                     {(file.size / (1024 * 1024)).toFixed(1)} MB
                   </p>
@@ -193,7 +140,7 @@ export default function UploadPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 ml-2"
+                  className="h-7 w-7 flex-shrink-0"
                   onClick={(e) => {
                     e.stopPropagation();
                     setFile(null);
@@ -243,7 +190,7 @@ export default function UploadPage() {
                 <SelectTrigger>
                   <SelectValue placeholder="Select voice" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="max-h-[300px]">
                   {availableVoices.map((voice) => (
                     <SelectItem key={voice.id} value={voice.id}>
                       {voice.label}
@@ -252,7 +199,7 @@ export default function UploadPage() {
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                Using Sarvam AI Bulbul v3 model
+                Using Sarvam AI Bulbul v3 model • 37 voices available
               </p>
             </div>
           )}

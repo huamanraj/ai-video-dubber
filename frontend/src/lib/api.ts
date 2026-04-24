@@ -44,6 +44,12 @@ export const api = {
     if (!res.ok) throw new Error("Failed to cancel job");
   },
 
+  async clearQueue(): Promise<{ detail: string }> {
+    const res = await fetch(`${API_BASE}/api/queue`, { method: "DELETE" });
+    if (!res.ok) throw new Error("Failed to clear queue");
+    return res.json();
+  },
+
   getDownloadUrl(jobId: string): string {
     return `${API_BASE}/api/download/${jobId}`;
   },

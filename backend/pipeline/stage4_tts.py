@@ -23,7 +23,10 @@ def _generate_with_sarvam(
         raise ValueError("SARVAM_API_KEY is not set in environment variables")
     
     # Convert language code to Sarvam format (e.g., "hi" -> "hi-IN")
-    sarvam_lang = SARVAM_LANGUAGE_MAP.get(language, "en-IN")
+    sarvam_lang = SARVAM_LANGUAGE_MAP.get(language)
+    
+    if sarvam_lang is None:
+        raise ValueError(f"Language '{language}' is not supported by Sarvam TTS API. Supported languages: hi, bn, ta, te, kn, ml, mr, gu, pa, or")
     
     headers = {
         "api-subscription-key": SARVAM_API_KEY,
@@ -71,7 +74,7 @@ def generate_tts_clips(
     original_audio_path: str,
     output_dir: str,
     lang: str = "en",
-    voice_id: str = "priya",
+    voice_id: str = "shubh",
 ) -> list[str]:
     """Generate TTS clips using Sarvam AI API."""
     

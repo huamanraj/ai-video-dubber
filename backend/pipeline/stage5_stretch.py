@@ -19,19 +19,22 @@ def time_stretch_clips(
 
         tts_audio = AudioSegment.from_wav(clip_path)
         tts_duration = len(tts_audio) / 1000.0
-
         if tts_duration <= 0:
             stretched_paths.append(clip_path)
             continue
 
         atempo = tts_duration / original_duration
-        atempo = max(0.5, min(2.0, atempo))
+
+        # Only stretch if meaningfully different (>5%) — avoids re-encoding for tiny diffs
+        if abs(atempo - 1.0) < 0.05:
+            stretched_paths.append(clip_path)
+            continue
 
         stretched_path = os.path.join(stretched_dir, f"stretched_{i}.wav")
         subprocess.run(
             [
                 "ffmpeg", "-y", "-i", clip_path,
-                "-filter:a", f"atempo={atempo:.4f}",
+                "-filter:a", _atempo_filter(atempo),
                 stretched_path,
             ],
             check=True,
@@ -40,3 +43,20 @@ def time_stretch_clips(
         stretched_paths.append(stretched_path)
 
     return stretched_paths
+
+
+def _atempo_filter(atempo: float) -> str:
+    """Build a chained atempo filter that handles values outside ffmpeg's [0.5, 2.0] limit."""
+    # Hard cap: beyond 4x speed-up or 4x slow-down sounds terrible anyway
+    atempo = max(0.25, min(4.0, atempo))
+
+    filters = []
+    remaining = atempo
+    while remaining > 2.0:
+        filters.append("atempo=2.0")
+        remaining /= 2.0
+    while remaining < 0.5:
+        filters.append("atempo=0.5")
+        remaining /= 0.5
+    filters.append(f"atempo={remaining:.4f}")
+    return ",".join(filters)

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from job_store import list_jobs, get_job, remove_job
+from job_store import list_jobs, get_job, remove_job, clear_all_jobs
 from routers.job_view import serialize_job
 
 router = APIRouter()
@@ -9,6 +9,12 @@ router = APIRouter()
 @router.get("/queue")
 async def queue_list():
     return [serialize_job(job) for job in list_jobs()]
+
+
+@router.delete("/queue")
+async def clear_queue():
+    count = clear_all_jobs()
+    return {"detail": f"Cleared {count} job(s)"}
 
 
 @router.delete("/queue/{job_id}")

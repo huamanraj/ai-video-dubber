@@ -1,7 +1,7 @@
 import uuid
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 
-from config import UPLOAD_DIR, LANGUAGE_MAP, SARVAM_VOICES
+from config import UPLOAD_DIR, LANGUAGE_MAP, SARVAM_VOICES, SARVAM_LANGUAGE_MAP
 from job_store import create_job, get_job
 from queue_manager import job_queue, notify_update
 
@@ -18,6 +18,13 @@ async def dub(
         raise HTTPException(
             status_code=400,
             detail=f"Unsupported language '{target_language}'. Supported: {list(LANGUAGE_MAP.keys())}",
+        )
+
+    # Validate language is supported by Sarvam TTS
+    if SARVAM_LANGUAGE_MAP.get(target_language) is None:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Language '{target_language}' is not supported by Sarvam TTS. Supported languages: hi, bn, ta, te, kn, ml, mr, gu, pa, or",
         )
 
     # Validate voice_id if provided

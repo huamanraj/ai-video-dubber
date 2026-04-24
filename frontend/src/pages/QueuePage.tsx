@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQueue, useCancelJob } from "@/hooks/use-api";
+import { useQueue, useCancelJob, useClearQueue } from "@/hooks/use-api";
 import { StatusBadge } from "@/components/StatusBadge";
 import { LogViewer } from "@/components/LogViewer";
 import { Progress } from "@/components/ui/progress";
@@ -23,7 +23,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { api } from "@/lib/api";
-import { Download, X, ChevronDown, ChevronRight, Loader2, InboxIcon } from "lucide-react";
+import { Download, X, ChevronDown, ChevronRight, Loader2, InboxIcon, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 
@@ -31,16 +31,23 @@ import { Skeleton } from "@/components/ui/skeleton";
 export default function QueuePage() {
   const { data: queue, isLoading, isError } = useQueue();
   const cancelJob = useCancelJob();
+  const clearQueue = useClearQueue();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [cancelId, setCancelId] = useState<string | null>(null);
+  const [clearConfirm, setClearConfirm] = useState(false);
   const [progressAnimations, setProgressAnimations] = useState<Record<string, number>>({});
+
+  // Sort queue to show newest jobs first
+  const sortedQueue = [...(queue || [])].sort((a, b) => 
+    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
 
   // Animate progress bars
   useEffect(() => {
-    if (!queue) return;
+    if (!sortedQueue) return;
     
     const newAnimations: Record<string, number> = {};
-    queue.forEach(job => {
+    sortedQueue.forEach(job => {
       if (job.status === "processing" || job.status === "queued") {
         // Smooth animation for processing jobs
         const targetProgress = job.progress;
@@ -69,11 +76,29 @@ export default function QueuePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-lg font-semibold text-foreground">Queue</h1>
-        <p className="text-sm text-muted-foreground mt-0.5">
-          Monitor and manage your dubbing jobs
-        </p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-lg font-semibold text-foreground">Queue</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            Monitor and manage your dubbing jobs
+          </p>
+        </div>
+        {queue && queue.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive"
+            onClick={() => setClearConfirm(true)}
+            disabled={clearQueue.isPending}
+          >
+            {clearQueue.isPending ? (
+              <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+            ) : (
+              <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+            )}
+            Clear all
+          </Button>
+        )}
       </div>
 
       <div className="border rounded-lg overflow-hidden bg-card shadow-card">
@@ -112,7 +137,7 @@ export default function QueuePage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {queue.map((job) => (
+              {sortedQueue.map((job) => (
                 <>
                   <TableRow
                     key={job.job_id}
@@ -218,6 +243,26 @@ export default function QueuePage() {
           </Table>
         )}
       </div>
+
+      <AlertDialog open={clearConfirm} onOpenChange={setClearConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear all jobs?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove all jobs from the queue. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => { clearQueue.mutate(); setClearConfirm(false); }}
+            >
+              Clear all
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <AlertDialog open={!!cancelId} onOpenChange={() => setCancelId(null)}>
         <AlertDialogContent>

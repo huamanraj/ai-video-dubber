@@ -5,31 +5,20 @@ description = "Backend for Video Dubbing"
 readme = "README.md"
 requires-python = "==3.12.*"
 dependencies = [
-    # ── Server ──────────────────────────────────────────────
-    "fastapi",
-    "uvicorn[standard]",
-    "python-multipart",
-
-    # ── ML core ─────────────────────────────────────────────
-    "torch==2.3.1",
-    "torchaudio==2.3.1",
-
-    # ── Stage 2: Transcription ───────────────────────────────
-    "whisperx",
-
-    # ── Stage 3: Translation ─────────────────────────────────
-    "requests",           # for Gemini API calls
-    "python-dotenv",      # for environment variables
-
-    # ── Stage 4: TTS (Sarvam AI API) ─────────────────────────
-    "indic-nlp-library",  # text normalization for Indian scripts
-    "soundfile",          # write .wav clips
-
-    # ── Shared utils ─────────────────────────────────────────
-    "pydub",
-    "ffmpeg-python",
+    "fastapi>=0.100",
+    "uvicorn[standard]>=0.23",
+    "python-multipart>=0.0.6",
+    "requests>=2.28",
+    "sarvamai>=0.1.28",
+    "python-dotenv>=1.0",
+    "soundfile>=0.12",
+    "pydub>=0.25",
+    "ffmpeg-python>=0.2",
     "numpy<2",
     "setuptools<81",
+    "transformers>=4.30",
+    "sentencepiece>=0.1",
+    "accelerate>=0.20",
 ]
 
 [tool.uv.sources]

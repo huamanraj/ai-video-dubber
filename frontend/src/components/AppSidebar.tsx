@@ -14,9 +14,9 @@ import {
 } from "@/components/ui/sidebar";
 
 const items = [
-  { title: "Queue", url: "/", icon: ListOrdered },
-  { title: "Upload", url: "/upload", icon: Upload },
-  { title: "Settings", url: "/settings", icon: Settings },
+  { title: "Queue", url: "/dashboard", icon: ListOrdered },
+  { title: "Upload", url: "/dashboard/upload", icon: Upload },
+  { title: "Settings", url: "/dashboard/settings", icon: Settings },
 ];
 
 export function AppSidebar() {
@@ -45,7 +45,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink
                       to={item.url}
-                      end={item.url === "/"}
+                      end={item.url === "/dashboard"}
                       className="hover:bg-sidebar-accent/60"
                       activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                     >

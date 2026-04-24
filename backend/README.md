@@ -203,7 +203,6 @@ Response:
 
 - **IndicF5** (10 languages) — F5-TTS fine-tuned by AI4Bharat (IIT Madras) on 1,417 hours of Indian speech. Supports voice cloning from the original speaker.
 - **Indic Parler-TTS** (Urdu fallback) — No voice cloning; uses a preset natural voice. Covers 21 Indian languages.
-- **Text normalization** — All Indic text is cleaned via `indic-nlp-library` before TTS to handle Unicode quirks, punctuation, and number forms (e.g. `₹500` → spoken form).
 - **Voice cloning quality** — Cloned voices for Indian languages have a slight accent overlay from training data. This is the current best open-source option.
 
 ---
